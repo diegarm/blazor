@@ -1,0 +1,257 @@
+@page "/tarefas"
+@using BlazorLab.Application.Interfaces
+@using BlazorLab.Application.Dtos
+@using BlazorLab.Web.Components.Shared
+@inject ITarefaService TarefaService
+@rendermode InteractiveServer
+
+<div class="container mt-4">
+    <h1>✅ Gerenciador de Tarefas</h1>
+    <p class="text-muted">Sistema completo com Repository Pattern, DI e EF Core</p>
+
+    @if (Carregando)
+    {
+        <div class="alert alert-info">
+            <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+            Carregando tarefas...
+        </div>
+    }
+    else if (Erro != null)
+    {
+        <div class="alert alert-danger">
+            ❌ Erro: @Erro
+        </div>
+    }
+    else
+    {
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <DemoCard Titulo="Nova Tarefa" Descricao="Adicione uma nova tarefa ao sistema">
+                    <div class="mb-3">
+                        <label class="form-label">Título</label>
+                        <input type="text" class="form-control" @bind="NovaTarefa.Titulo" placeholder="Ex: Estudar Blazor" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Descrição</label>
+                        <textarea class="form-control" @bind="NovaTarefa.Descricao" placeholder="Descrição detalhada" rows="3"></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Data de Vencimento</label>
+                        <input type="date" class="form-control" @bind="NovaTarefa.DataVencimento" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Prioridade</label>
+                        <select class="form-select" @bind="NovaTarefa.Prioridade">
+                            <option value="Baixa">Baixa</option>
+                            <option value="Média">Média</option>
+                            <option value="Alta">Alta</option>
+                        </select>
+                    </div>
+
+                    <button class="btn btn-success" @onclick="CriarTarefa" disabled="@Salvando">
+                        @if (Salvando)
+                        {
+                            <span class="spinner-border spinner-border-sm me-2"></span>
+                        }
+                        Criar Tarefa
+                    </button>
+                </DemoCard>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-info text-white">
+                        <h6 class="mb-0">📊 Estatísticas</h6>
+                    </div>
+                    <div class="card-body">
+                        <p><strong>Total de Tarefas:</strong> @ListaTarefas.Count</p>
+                        <p><strong>Concluídas:</strong> <span class="badge bg-success">@ListaTarefas.Count(t => t.Concluida)</span></p>
+                        <p><strong>Pendentes:</strong> <span class="badge bg-warning">@ListaTarefas.Count(t => !t.Concluida)</span></p>
+                        <p><strong>Alta Prioridade:</strong> <span class="badge bg-danger">@ListaTarefas.Count(t => t.Prioridade == "Alta")</span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <DemoCard Titulo="Lista de Tarefas" 
+                  Descricao="Visualize, marque como concluída ou delete suas tarefas">
+            @if (ListaTarefas.Count == 0)
+            {
+                <div class="alert alert-secondary">
+                    📭 Nenhuma tarefa criada ainda. Adicione uma tarefa acima!
+                </div>
+            }
+            else
+            {
+                <div class="list-group">
+                    @foreach (var tarefa in ListaTarefas)
+                    {
+                        <div class="list-group-item">
+                            <div class="row align-items-center">
+                                <div class="col-md-8">
+                                    <div class="d-flex align-items-center">
+                                        <input type="checkbox" 
+                                               class="form-check-input me-3" 
+                                               checked="@tarefa.Concluida"
+                                               @onchange="@((ChangeEventArgs e) => AlternarConclusao(tarefa.Id, (bool)e.Value!))" />
+                                        
+                                        <div>
+                                            <h6 class="@(tarefa.Concluida ? "text-decoration-line-through text-muted" : "")">
+                                                @tarefa.Titulo
+                                            </h6>
+                                            <small class="text-muted">@tarefa.Descricao</small>
+                                            <div class="mt-2">
+                                                @if (!string.IsNullOrEmpty(tarefa.Prioridade))
+                                                {
+                                                    var classBadge = tarefa.Prioridade switch
+                                                    {
+                                                        "Alta" => "bg-danger",
+                                                        "Média" => "bg-warning",
+                                                        "Baixa" => "bg-success",
+                                                        _ => "bg-secondary"
+                                                    };
+                                                    <span class="badge @classBadge">@tarefa.Prioridade</span>
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 text-end">
+                                    <small class="text-muted">@tarefa.DataCriacao.ToString("dd/MM/yyyy HH:mm")</small>
+                                    <br />
+                                    @if (tarefa.DataVencimento.HasValue)
+                                    {
+                                        <small class="text-warning">Vence: @tarefa.DataVencimento.Value.ToString("dd/MM/yyyy")</small>
+                                    }
+                                    <br />
+                                    <button class="btn btn-sm btn-danger mt-2" @onclick="() => DeletarTarefa(tarefa.Id)">
+                                        Deletar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </DemoCard>
+
+        <CodeSnippet Titulo="Estrutura de Serviços" Codigo="@CodigoServicos" />
+    }
+</div>
+
+@code {
+    private List<TarefaDto> ListaTarefas = new();
+    private CreateTarefaDto NovaTarefa = new();
+    private bool Carregando = false;
+    private bool Salvando = false;
+    private string? Erro = null;
+
+    private string CodigoServicos = @"
+// Program.cs - Registro de Serviços
+builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+builder.Services.AddScoped<ITarefaService, TarefaService>();
+
+// No Componente - Injeção
+@inject ITarefaService TarefaService
+
+// Usar o serviço
+protected override async Task OnInitializedAsync()
+{
+    ListaTarefas = await TarefaService.ObterTarefasAsync();
+}
+
+// TarefaService.cs - Camada de negócio
+public class TarefaService : ITarefaService
+{
+    private readonly IRepository<Tarefa> _repository;
+    
+    public async Task<TarefaDto> CriarTarefaAsync(CreateTarefaDto dto)
+    {
+        var tarefa = new Tarefa { ... };
+        await _repository.AdicionarAsync(tarefa);
+        await _repository.SalvarAlteracoesAsync();
+        return MapToDto(tarefa);
+    }
+}";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CarregarTarefas();
+    }
+
+    private async Task CarregarTarefas()
+    {
+        try
+        {
+            Carregando = true;
+            ListaTarefas = await TarefaService.ObterTarefasAsync();
+            Erro = null;
+        }
+        catch (Exception ex)
+        {
+            Erro = ex.Message;
+        }
+        finally
+        {
+            Carregando = false;
+        }
+    }
+
+    private async Task CriarTarefa()
+    {
+        if (string.IsNullOrWhiteSpace(NovaTarefa.Titulo))
+        {
+            Erro = "Título é obrigatório";
+            return;
+        }
+
+        try
+        {
+            Salvando = true;
+            var novaTarefa = await TarefaService.CriarTarefaAsync(NovaTarefa);
+            ListaTarefas.Add(novaTarefa);
+            NovaTarefa = new CreateTarefaDto();
+            Erro = null;
+        }
+        catch (Exception ex)
+        {
+            Erro = $"Erro ao criar tarefa: {ex.Message}";
+        }
+        finally
+        {
+            Salvando = false;
+        }
+    }
+
+    private async Task AlternarConclusao(int id, bool novovalor)
+    {
+        try
+        {
+            await TarefaService.AlternarConclusaoAsync(id);
+            var tarefa = ListaTarefas.FirstOrDefault(t => t.Id == id);
+            if (tarefa != null)
+                tarefa.Concluida = novovalor;
+        }
+        catch (Exception ex)
+        {
+            Erro = $"Erro ao atualizar: {ex.Message}";
+        }
+    }
+
+    private async Task DeletarTarefa(int id)
+    {
+        try
+        {
+            await TarefaService.DeletarTarefaAsync(id);
+            ListaTarefas.RemoveAll(t => t.Id == id);
+            Erro = null;
+        }
+        catch (Exception ex)
+        {
+            Erro = $"Erro ao deletar: {ex.Message}";
+        }
+    }
+}

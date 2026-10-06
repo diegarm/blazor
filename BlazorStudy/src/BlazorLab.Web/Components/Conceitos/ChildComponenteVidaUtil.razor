@@ -1,0 +1,62 @@
+@namespace BlazorLab.Web.Components.Conceitos
+@using BlazorLab.Web.Components.Shared
+
+<div class="card border-success mt-3">
+    <div class="card-header bg-success text-white">
+        <h6 class="mb-0">🧒 Componente Filho - Ciclo de Vida</h6>
+    </div>
+    <div class="card-body">
+        <p><strong>Parâmetro Recebido:</strong> @ParametroExemplo</p>
+        <p><strong>Contador Interno:</strong> @ContadorInterno</p>
+        <button class="btn btn-sm btn-success" @onclick="IncrementarContador">Incrementar</button>
+        
+        <LogPanel @ref="LogPanel" />
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public int ParametroExemplo { get; set; }
+
+    [Parameter]
+    public EventCallback OnParametroAlterado { get; set; }
+
+    private int ContadorInterno = 0;
+    private LogPanel? LogPanel;
+
+    protected override void OnInitialized()
+    {
+        LogPanel?.RegistrarEvento("OnInitialized", "Componente filho inicializado");
+    }
+
+    protected override void OnParametersSet()
+    {
+        LogPanel?.RegistrarEvento("OnParametersSet", $"Parâmetro agora é {ParametroExemplo}");
+    }
+
+    protected override bool ShouldRender()
+    {
+        LogPanel?.RegistrarEvento("ShouldRender", "Verificando se deve re-renderizar");
+        return true;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            LogPanel?.RegistrarEvento("OnAfterRender", "Primeira renderização");
+        }
+        else
+        {
+            LogPanel?.RegistrarEvento("OnAfterRender", "Re-renderizado");
+        }
+        await base.OnAfterRenderAsync(firstRender);
+    }
+
+    private async Task IncrementarContador()
+    {
+        ContadorInterno++;
+        LogPanel?.RegistrarEvento("Action", $"Contador incrementado: {ContadorInterno}");
+        await OnParametroAlterado.InvokeAsync();
+    }
+}

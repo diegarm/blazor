@@ -1,0 +1,118 @@
+﻿@page "/"
+@rendermode InteractiveServer
+
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-12">
+            <h1 class="display-4">Bem-vindo ao BlazorLab! 🚀</h1>
+            <p class="lead text-muted">Um projeto educacional para aprender Blazor com conceitos práticos do mercado</p>
+            
+            <hr class="my-4">
+            
+            <div class="alert alert-info">
+                <h5>O que você vai aprender:</h5>
+                <p>Este projeto foi criado para demonstrar conceitos reais usados no mercado de trabalho:</p>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-header bg-primary text-white">
+                            <h6 class="mb-0">📚 Fundamentos</h6>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-unstyled">
+                                <li>✓ Sintaxe Razor</li>
+                                <li>✓ Data Binding</li>
+                                <li>✓ Eventos</li>
+                                <li>✓ Renderização Condicional</li>
+                            </ul>
+                            <NavLink href="/fundamentos/sintaxe" class="btn btn-sm btn-primary mt-3">
+                                Iniciar
+                            </NavLink>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-header bg-success text-white">
+                            <h6 class="mb-0">🔄 Ciclo de Vida</h6>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-unstyled">
+                                <li>✓ SetParametersAsync</li>
+                                <li>✓ OnInitialized</li>
+                                <li>✓ OnParametersSet</li>
+                                <li>✓ OnAfterRender</li>
+                            </ul>
+                            <NavLink href="/conceitos/ciclo-de-vida" class="btn btn-sm btn-success mt-3">
+                                Explorar
+                            </NavLink>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-header bg-warning text-white">
+                            <h6 class="mb-0">🔗 Comunicação</h6>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-unstyled">
+                                <li>✓ [Parameter]</li>
+                                <li>✓ EventCallback</li>
+                                <li>✓ CascadingValue</li>
+                                <li>✓ Serviços de Estado</li>
+                            </ul>
+                            <NavLink href="/comunicacao/parametros" class="btn btn-sm btn-warning mt-3">
+                                Aprender
+                            </NavLink>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-header bg-danger text-white">
+                            <h6 class="mb-0">🗂️ Padrões</h6>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-unstyled">
+                                <li>✓ Repository Pattern</li>
+                                <li>✓ Injeção de Dependências</li>
+                                <li>✓ EF Core + SQLite</li>
+                                <li>✓ Autenticação</li>
+                            </ul>
+                            <NavLink href="/tarefas" class="btn btn-sm btn-danger mt-3">
+                                Demo
+                            </NavLink>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <hr class="my-5">
+
+            <div class="row mt-5">
+                <div class="col-md-12">
+                    <h3>📌 Navegação Rápida</h3>
+                    <div class="list-group">
+                        <NavLink href="/conceitos/ciclo-de-vida" class="list-group-item list-group-item-action">
+                            Ciclo de Vida dos Componentes
+                        </NavLink>
+                        <NavLink href="/conceitos/data-binding" class="list-group-item list-group-item-action">
+                            Data Binding e Eventos
+                        </NavLink>
+                        <NavLink href="/comunicacao/parametros" class="list-group-item list-group-item-action">
+                            Comunicação entre Componentes
+                        </NavLink>
+                        <NavLink href="/tarefas" class="list-group-item list-group-item-action">
+                            Sistema de Tarefas (CRUD)
+                        </NavLink>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

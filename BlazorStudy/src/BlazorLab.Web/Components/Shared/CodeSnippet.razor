@@ -1,0 +1,30 @@
+@namespace BlazorLab.Web.Components.Shared
+
+<div class="code-snippet mb-3">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <code>@Titulo</code>
+        <button class="btn btn-sm btn-outline-secondary" @onclick="AlternarVisibilidade">
+            @(MostrandoCodigo ? "Ocultar" : "Ver Código")
+        </button>
+    </div>
+
+    @if (MostrandoCodigo)
+    {
+        <pre class="bg-dark text-light p-3 rounded"><code>@Codigo</code></pre>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public string Titulo { get; set; } = "Código";
+
+    [Parameter]
+    public string Codigo { get; set; } = string.Empty;
+
+    private bool MostrandoCodigo = false;
+
+    private void AlternarVisibilidade()
+    {
+        MostrandoCodigo = !MostrandoCodigo;
+    }
+}

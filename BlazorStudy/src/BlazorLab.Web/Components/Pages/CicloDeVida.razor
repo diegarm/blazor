@@ -1,0 +1,145 @@
+@page "/conceitos/ciclo-de-vida"
+@using BlazorLab.Web.Components.Shared
+@using BlazorLab.Web.Components.Conceitos
+@rendermode InteractiveServer
+
+<div class="container mt-4">
+    <h1>🔄 Ciclo de Vida dos Componentes Blazor</h1>
+    <p class="text-muted">Entenda os métodos do ciclo de vida e quando são executados</p>
+
+    <DemoCard Titulo="O Ciclo de Vida Explicado" 
+              Descricao="Cada componente Blazor passa por vários métodos durante sua vida. Clique nos botões abaixo para disparar ações e observe o log">
+        <div class="mb-3">
+            <button class="btn btn-primary" @onclick="AlterarParametro">Alterar Parâmetro</button>
+            <button class="btn btn-info" @onclick="ForcarReRender">Forçar Re-render</button>
+            <button class="btn btn-warning" @onclick="AtualizarDado">Atualizar Dado</button>
+            <button class="btn btn-danger" @onclick="DescarregarComponente">Descarregar Componente</button>
+        </div>
+
+        @if (ComponenteVivo)
+        {
+            <ChildComponenteVidaUtil ParametroExemplo="@Parametro" OnParametroAlterado="@HandleParametroAlterado" />
+        }
+        else
+        {
+            <div class="alert alert-warning">Componente descarregado. Clique em 'Alterar Parâmetro' para recarregar.</div>
+        }
+
+        <LogPanel @ref="LogPanel" />
+    </DemoCard>
+
+    <CodeSnippet Titulo="Métodos do Ciclo de Vida" Codigo="@CodigoMetodos" />
+
+    <DemoCard Titulo="Entendendo StateHasChanged()" Descricao="Use StateHasChanged quando precisa avisar ao Blazor que o estado mudou">
+        <div class="mb-3">
+            <p>Valor interno: <strong>@ValorInterno</strong></p>
+            <button class="btn btn-primary" @onclick="AlterarSemReRender">Alterar sem Re-render</button>
+            <button class="btn btn-info" @onclick="AlterarComReRender">Alterar com Re-render</button>
+        </div>
+    </DemoCard>
+</div>
+
+@code {
+    private int Parametro = 1;
+    private bool ComponenteVivo = true;
+    private int ValorInterno = 0;
+    private LogPanel? LogPanel;
+
+    private string CodigoMetodos = @"
+protected override async Task SetParametersAsync(ParameterView parameters)
+{
+    // Chamado antes de qualquer outra coisa
+    await base.SetParametersAsync(parameters);
+}
+
+protected override void OnInitialized()
+{
+    // Primeira renderização, componente já está pronto
+}
+
+protected override async Task OnInitializedAsync()
+{
+    // Async version - carregue dados aqui
+    await CarregarDadosAsync();
+}
+
+protected override void OnParametersSet()
+{
+    // Chamado quando parâmetros mudam
+}
+
+protected override async Task OnParametersSetAsync()
+{
+    // Async version
+}
+
+protected override bool ShouldRender()
+{
+    // Controle se deve re-renderizar (otimização)
+    return true;
+}
+
+protected override async Task OnAfterRenderAsync(bool firstRender)
+{
+    // Depois de renderizar na tela
+    // firstRender = true na primeira vez
+    if (firstRender)
+    {
+        await JS.InvokeVoidAsync(""console.log"", ""Renderizado pela primeira vez"");
+    }
+}
+
+public async ValueTask DisposeAsync()
+{
+    // Limpeza de recursos
+    await base.DisposeAsync();
+}";
+
+    protected override void OnInitialized()
+    {
+        LogPanel?.RegistrarEvento("OnInitialized", "Componente pai inicializado");
+    }
+
+    private void AlterarParametro()
+    {
+        ComponenteVivo = true;
+        Parametro++;
+        LogPanel?.RegistrarEvento("Action", $"Parâmetro alterado para {Parametro}");
+    }
+
+    private void ForcarReRender()
+    {
+        StateHasChanged();
+        LogPanel?.RegistrarEvento("Action", "StateHasChanged() foi chamado");
+    }
+
+    private void AtualizarDado()
+    {
+        LogPanel?.RegistrarEvento("Action", "Dado atualizado, re-render automático");
+        StateHasChanged();
+    }
+
+    private void DescarregarComponente()
+    {
+        ComponenteVivo = false;
+        LogPanel?.RegistrarEvento("Action", "Componente descarregado (Dispose será chamado)");
+    }
+
+    private void AlterarSemReRender()
+    {
+        ValorInterno++;
+        LogPanel?.RegistrarEvento("SemReRender", $"Valor alterado para {ValorInterno} mas a UI não foi atualizada");
+    }
+
+    private void AlterarComReRender()
+    {
+        ValorInterno++;
+        StateHasChanged();
+        LogPanel?.RegistrarEvento("ComReRender", $"Valor alterado para {ValorInterno} e UI foi atualizada");
+    }
+
+    private void HandleParametroAlterado()
+    {
+        LogPanel?.RegistrarEvento("Child", "Parâmetro alterado no componente filho");
+    }
+}

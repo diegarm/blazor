@@ -1,0 +1,162 @@
+@page "/conceitos/data-binding"
+@using BlazorLab.Web.Components.Shared
+@rendermode InteractiveServer
+
+<div class="container mt-4">
+    <h1>📊 Data Binding e Eventos</h1>
+    <p class="text-muted">Entenda como conectar dados e responder a eventos no Blazor</p>
+
+    <DemoCard Titulo="One-Way Binding" 
+              Descricao="Exibe dados mas não atualiza automaticamente quando o usuário muda">
+        <div class="mb-3">
+            <p>Valor: @ValorOneWay</p>
+            <input type="text" class="form-control" value="@ValorOneWay" />
+            <small class="text-muted">⚠️ Digite no input, mas o valor acima não muda até usar bind</small>
+        </div>
+    </DemoCard>
+
+    <DemoCard Titulo="Two-Way Binding" 
+              Descricao="Conecta o input ao state - mudanças são automáticas">
+        <div class="mb-3">
+            <p>Valor: <strong>@ValorTwoWay</strong></p>
+            <input type="text" class="form-control" @bind="ValorTwoWay" />
+            <small class="text-success">✓ Observe que o valor acima muda automaticamente</small>
+        </div>
+    </DemoCard>
+
+    <DemoCard Titulo="Binding com Events" 
+              Descricao="Controle quando o binding acontece">
+        <div class="mb-3">
+            <p>Valor com oninput: <strong>@ValorOninput</strong></p>
+            <input type="text" class="form-control" @bind="ValorOninput" @bind:event="oninput" />
+            <small class="text-info">💡 Atualiza a cada tecla pressionada (oninput)</small>
+        </div>
+
+        <p class="mt-3">Valor com onchange: <strong>@ValorOnchange</strong></p>
+        <input type="text" class="form-control" @bind="ValorOnchange" @bind:event="onchange" />
+        <small class="text-info">💡 Atualiza apenas quando sai do input (onchange)</small>
+    </DemoCard>
+
+    <DemoCard Titulo="Manipulando Eventos" 
+              Descricao="Responda a eventos dos elementos HTML">
+        <div class="mb-3">
+            <button class="btn btn-primary" @onclick="HandleClick">Clique Aqui</button>
+            <p class="mt-2">Vezes clicado: <strong>@ClicosContador</strong></p>
+        </div>
+
+        <form @onsubmit="HandleSubmit" class="mt-3">
+            <div class="mb-2">
+                <input type="text" class="form-control" @bind="NomeFormulario" placeholder="Digite seu nome" />
+            </div>
+            <button type="submit" class="btn btn-success">Enviar</button>
+        </form>
+        
+        @if (!string.IsNullOrEmpty(MensagemSubmit))
+        {
+            <div class="alert alert-info mt-2">@MensagemSubmit</div>
+        }
+    </DemoCard>
+
+    <DemoCard Titulo="Listas com key" 
+              Descricao="Use key para otimizar listas e rastrear identidade">
+        <div class="mb-3">
+            <input type="text" class="form-control mb-2" @bind="NovoItem" placeholder="Novo item" />
+            <button class="btn btn-primary" @onclick="AdicionarItem">Adicionar</button>
+            <button class="btn btn-secondary" @onclick="LimparItens">Limpar</button>
+        </div>
+
+        <ul class="list-group">
+            @foreach (var item in Itens)
+            {
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <span>@item.Nome</span>
+                    <button class="btn btn-sm btn-danger" @onclick="() => RemoverItem(item.Id)">
+                        Remover
+                    </button>
+                </li>
+            }
+        </ul>
+    </DemoCard>
+
+    <CodeSnippet Titulo="Exemplos de Binding" Codigo="@CodigoExemplos" />
+</div>
+
+@code {
+    private string ValorOneWay = "Digite aqui";
+    private string ValorTwoWay = "";
+    private string ValorOninput = "";
+    private string ValorOnchange = "";
+    private int ClicosContador = 0;
+    private string NomeFormulario = "";
+    private string MensagemSubmit = "";
+    private string NovoItem = "";
+    private List<ItemLista> Itens = new();
+    private int ProximoId = 1;
+
+    private class ItemLista
+    {
+        public int Id { get; set; }
+        public string Nome { get; set; } = string.Empty;
+    }
+
+    private string CodigoExemplos = @"
+// One-Way Binding
+<p>Valor: @ValorUm</p>
+
+// Two-Way Binding
+<input @bind=""Valor"" />
+
+// Binding com evento
+<input @bind=""Valor"" @bind:event=""oninput"" />
+
+// Manipular eventos
+<button @onclick=""HandleClick"">Clique</button>
+<button @onclick=""@((e) => MeuMetodo(e))"">Clique com parâmetro</button>
+
+// Listas com @key
+@foreach (var item in Lista)
+{
+    <div @key=""item.Id"">
+        @item.Nome
+    </div>
+}
+
+// Formulários
+<form @onsubmit=""HandleSubmit"">
+    <input type=""text"" @bind=""Campo"" />
+    <button type=""submit"">Enviar</button>
+</form>";
+
+    private void HandleClick()
+    {
+        ClicosContador++;
+    }
+
+    private void HandleSubmit()
+    {
+        if (!string.IsNullOrEmpty(NomeFormulario))
+        {
+            MensagemSubmit = $"Olá, {NomeFormulario}! Seu formulário foi enviado.";
+            NomeFormulario = "";
+        }
+    }
+
+    private void AdicionarItem()
+    {
+        if (!string.IsNullOrEmpty(NovoItem))
+        {
+            Itens.Add(new ItemLista { Id = ProximoId++, Nome = NovoItem });
+            NovoItem = "";
+        }
+    }
+
+    private void RemoverItem(int id)
+    {
+        Itens.RemoveAll(i => i.Id == id);
+    }
+
+    private void LimparItens()
+    {
+        Itens.Clear();
+    }
+}

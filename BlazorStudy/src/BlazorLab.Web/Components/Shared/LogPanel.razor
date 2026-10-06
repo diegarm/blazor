@@ -1,0 +1,58 @@
+@namespace BlazorLab.Web.Components.Shared
+
+<div class="log-panel border rounded p-3 bg-light">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <h6 class="mb-0">📋 Log de Eventos</h6>
+        <button class="btn btn-sm btn-secondary" @onclick="LimparLog">Limpar</button>
+    </div>
+    
+    <div class="log-content" style="max-height: 300px; overflow-y: auto; border: 1px solid #dee2e6; border-radius: 0.25rem;">
+        @if (Eventos.Count == 0)
+        {
+            <div class="text-muted p-2">Nenhum evento registrado</div>
+        }
+        else
+        {
+            @foreach (var evento in Eventos)
+            {
+                <div class="log-entry p-2 border-bottom">
+                    <small class="text-muted">@evento.Timestamp.ToString("HH:mm:ss.fff")</small>
+                    <span class="badge bg-primary">@evento.Tipo</span>
+                    <div>@evento.Mensagem</div>
+                </div>
+            }
+        }
+    </div>
+</div>
+
+@code {
+    public class EventoLog
+    {
+        public DateTime Timestamp { get; set; }
+        public string Tipo { get; set; } = string.Empty;
+        public string Mensagem { get; set; } = string.Empty;
+    }
+
+    private List<EventoLog> Eventos { get; set; } = new();
+
+    public void RegistrarEvento(string tipo, string mensagem)
+    {
+        Eventos.Insert(0, new EventoLog
+        {
+            Timestamp = DateTime.Now,
+            Tipo = tipo,
+            Mensagem = mensagem
+        });
+        
+        if (Eventos.Count > 50)
+            Eventos.RemoveAt(Eventos.Count - 1);
+        
+        StateHasChanged();
+    }
+
+    public void LimparLog()
+    {
+        Eventos.Clear();
+        StateHasChanged();
+    }
+}

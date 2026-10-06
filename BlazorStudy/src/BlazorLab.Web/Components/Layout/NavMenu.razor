@@ -1,0 +1,44 @@
+﻿<div class="top-row ps-3 navbar navbar-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="">🚀 BlazorLab</a>
+    </div>
+</div>
+
+<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
+
+<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
+    <nav class="nav flex-column">
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <span class="nav-link" style="color: #6c757d;">📚 Fundamentos</span>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="conceitos/ciclo-de-vida">
+                <span class="bi bi-arrow-repeat" aria-hidden="true"></span> Ciclo de Vida
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="conceitos/data-binding">
+                <span class="bi bi-diagram-3" aria-hidden="true"></span> Data Binding
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <span class="nav-link" style="color: #6c757d;">🔗 Avançado</span>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="tarefas">
+                <span class="bi bi-check2-square" aria-hidden="true"></span> Sistema de Tarefas
+            </NavLink>
+        </div>
+    </nav>
+</div>
+
