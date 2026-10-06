@@ -1,0 +1,56 @@
+## Visual Studio
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+## Build results
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+artifacts/
+publish/
+PublishScripts/
+
+## .NET / NuGet
+*.nupkg
+*.snupkg
+project.lock.json
+.nuget/
+packages/
+
+## Test results
+TestResults/
+[Tt]est[Rr]esult*/
+*.trx
+coverage*.xml
+*.coverage
+*.coveragexml
+
+## Blazor / ASP.NET Core
+wwwroot/lib/**/*.map
+launchSettings.json.bak
+appsettings.*.local.json
+secrets.json
+
+## Rider / VS Code
+.idea/
+*.sln.iml
+.vscode/
+
+## Profiling / diagnostics
+*.diagsession
+*.dotCover
+*.psess
+*.vsp
+*.vspx
+
+## OS
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+## Copilot / local tooling
+.github/copilot-session*/

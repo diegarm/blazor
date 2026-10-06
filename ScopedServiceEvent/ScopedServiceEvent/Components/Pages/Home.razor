@@ -1,0 +1,26 @@
+﻿@page "/"
+@rendermode InteractiveServer
+
+<PageTitle>Home</PageTitle>
+
+<h1>Exemplo de ScopedServiceEvent</h1>
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-6">
+            <h3>Botão</h3>
+            <CounterButton />
+        </div>
+        <div class="col-md-6">
+            <h3>Display</h3>
+            <CounterDisplay />
+        </div>
+    </div>
+    <div class="row mt-3">
+        <div class="col-12">
+            <p class="text-muted">
+                Clique no botão para incrementar. Abra uma segunda aba e confirme que cada circuito tem seu próprio contador (escopo por circuito de Blazor Server).
+            </p>
+        </div>
+    </div>
+</div>

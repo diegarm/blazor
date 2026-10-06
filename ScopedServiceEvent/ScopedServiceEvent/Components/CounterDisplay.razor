@@ -1,0 +1,24 @@
+@inject CounterState counterState
+@implements IAsyncDisposable
+
+<div class="alert alert-info">
+    <p>Contador atual: <strong>@counterState.Count</strong></p>
+</div>
+
+@code {
+    protected override void OnInitialized()
+    {
+        counterState.OnChange += OnCounterChanged;
+    }
+
+    private void OnCounterChanged()
+    {
+        _ = InvokeAsync(StateHasChanged);
+    }
+
+    async ValueTask IAsyncDisposable.DisposeAsync()
+    {
+        counterState.OnChange -= OnCounterChanged;
+    }
+}
+
