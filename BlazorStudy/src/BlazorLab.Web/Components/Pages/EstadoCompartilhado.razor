@@ -1,0 +1,14 @@
+@page "/conceitos/estado-compartilhado"
+@using BlazorLab.Web.Components.Conceitos
+@rendermode InteractiveServer
+
+<div class="container mt-4">
+    <h1>🔄 Estado Compartilhado</h1>
+    <p class="text-muted">
+        Header e Perfil não têm relação pai/filho. Ambos injetam o mesmo serviço Scoped (<code>UserState</code>),
+        que dispara um evento quando o nome muda. O Header assina o evento e chama <code>StateHasChanged</code>.
+    </p>
+
+    <UserHeader />
+    <UserProfile />
+</div>

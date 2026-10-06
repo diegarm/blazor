@@ -1,0 +1,5 @@
+<button class="btn btn-danger" @onclick="Explodir">💥 Gerar erro</button>
+
+@code {
+    private void Explodir() => throw new InvalidOperationException("Algo correu mal no componente filho!");
+}

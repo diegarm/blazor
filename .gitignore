@@ -54,3 +54,8 @@ Desktop.ini
 
 ## Copilot / local tooling
 .github/copilot-session*/
+
+.vs/
+[Bb]in/
+[Oo]bj/
+*.user

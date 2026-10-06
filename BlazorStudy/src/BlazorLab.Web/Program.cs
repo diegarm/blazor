@@ -28,6 +28,15 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 // Registrar serviços - Padrão Repository e Injeção de Dependências
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 builder.Services.AddScoped<ITarefaService, TarefaService>();
+builder.Services.AddScoped<BlazorLab.Web.Services.UserState>();
+
+builder.Services.AddTransient<BlazorLab.Web.Services.AuthLoggingHandler>();
+builder.Services.AddHttpClient<BlazorLab.Web.Services.IUserApi, BlazorLab.Web.Services.UserApi>(c =>
+    {
+        c.BaseAddress = new Uri("https://jsonplaceholder.typicode.com/");
+        c.Timeout = TimeSpan.FromSeconds(10);
+    })
+    .AddHttpMessageHandler<BlazorLab.Web.Services.AuthLoggingHandler>();
 
 var app = builder.Build();
 

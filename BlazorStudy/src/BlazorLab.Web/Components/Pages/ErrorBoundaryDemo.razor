@@ -1,0 +1,30 @@
+@page "/conceitos/error-boundary"
+@using BlazorLab.Web.Components.Conceitos
+@using BlazorLab.Web.Components.Shared
+@rendermode InteractiveServer
+
+<div class="container mt-4">
+    <h1>🛡️ ErrorBoundary</h1>
+    <p class="text-muted">Isola exceções não tratadas de componentes filhos sem derrubar a página inteira</p>
+
+    <DemoCard Titulo="ErrorBoundary com ErrorContent"
+              Descricao="Clique no botão para lançar uma exceção e depois recupere o componente">
+        <ErrorBoundary @ref="_errorBoundary">
+            <ChildContent>
+                <BuggyComponent />
+            </ChildContent>
+            <ErrorContent Context="ex">
+                <div class="alert alert-danger">
+                    <p class="mb-2">Ocorreu um erro: @ex.Message</p>
+                    <button class="btn btn-primary btn-sm" @onclick="Recuperar">Tentar novamente</button>
+                </div>
+            </ErrorContent>
+        </ErrorBoundary>
+    </DemoCard>
+</div>
+
+@code {
+    private ErrorBoundary? _errorBoundary;
+
+    private void Recuperar() => _errorBoundary?.Recover();
+}

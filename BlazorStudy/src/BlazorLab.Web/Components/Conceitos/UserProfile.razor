@@ -1,0 +1,5 @@
+@using BlazorLab.Web.Services
+@inject UserState State
+
+<label class="form-label">Nome do utilizador</label>
+<input class="form-control" @bind="State.Nome" @bind:event="oninput" />

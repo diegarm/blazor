@@ -1,0 +1,15 @@
+@using BlazorLab.Web.Services
+@inject UserState State
+@implements IDisposable
+
+<div class="p-3 mb-3 bg-primary text-white rounded">
+    👤 Olá, <strong>@State.Nome</strong>
+</div>
+
+@code {
+    protected override void OnInitialized() => State.OnChange += OnStateChanged;
+
+    private void OnStateChanged() => InvokeAsync(StateHasChanged);
+
+    public void Dispose() => State.OnChange -= OnStateChanged;
+}

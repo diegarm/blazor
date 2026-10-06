@@ -1,0 +1,28 @@
+@page "/conceitos/quickgrid-virtualize"
+@using Microsoft.AspNetCore.Components.QuickGrid
+@rendermode InteractiveServer
+
+<div class="container mt-4">
+    <h1>📋 QuickGrid e Virtualize</h1>
+
+    <h4 class="mt-4">QuickGrid</h4>
+    <QuickGrid Items="_itens.AsQueryable().Take(10)" Class="table">
+        <PropertyColumn Property="p => p.Id" Sortable="true" />
+        <PropertyColumn Property="p => p.Nome" Sortable="true" />
+    </QuickGrid>
+
+    <h4 class="mt-4">Virtualize (10.000 itens)</h4>
+    <div style="height: 250px; overflow-y: auto; border: 1px solid #ccc;">
+        <Virtualize Items="_itens" ItemSize="30" Context="item">
+            <div style="height: 30px;">@item.Id - @item.Nome</div>
+        </Virtualize>
+    </div>
+</div>
+
+@code {
+    private record Item(int Id, string Nome);
+
+    private readonly List<Item> _itens = Enumerable.Range(1, 10_000)
+        .Select(i => new Item(i, $"Item {i}"))
+        .ToList();
+}

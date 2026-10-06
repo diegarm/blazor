@@ -1,0 +1,107 @@
+@page "/conceitos/httpclient-factory"
+
+<PageTitle>HttpClient: o problema e a solução</PageTitle>
+
+<div class="container mt-4 mb-5">
+    <h1>🌐 Por que usar IHttpClientFactory?</h1>
+    <p class="text-muted">Cenário: Blazor Server com 500 utilizadores simultâneos, cada um chamando uma API de cotações.</p>
+
+    <div class="row g-3 mt-2">
+
+        <div class="col-lg-4">
+            <div class="card h-100 border-danger">
+                <div class="card-header bg-danger text-white">❌ 1. new HttpClient() por pedido</div>
+                <div class="card-body">
+                    <pre class="bg-light p-2 rounded small">using var client = new HttpClient();
+await client.GetAsync(url);</pre>
+                    <p class="small mb-2">O <code>Dispose()</code> <strong>não liberta o socket</strong>. O SO o mantém em <code>TIME_WAIT</code> por 30 a 240 s.</p>
+
+                    <div class="small text-muted">Sockets presos</div>
+                    <div class="progress mb-1" style="height:22px;"><div class="progress-bar bg-danger" style="width:25%">500</div></div>
+                    <div class="progress mb-1" style="height:22px;"><div class="progress-bar bg-danger" style="width:60%">1.200</div></div>
+                    <div class="progress mb-2" style="height:22px;"><div class="progress-bar bg-danger" style="width:100%">💥 esgotado</div></div>
+
+                    <div class="alert alert-danger small mb-0">
+                        <code>SocketException: Only one usage of each socket address is normally permitted</code><br />
+                        Funciona em desenvolvimento e falha sob carga.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card h-100 border-warning">
+                <div class="card-header bg-warning">⚠️ 2. HttpClient singleton eterno</div>
+                <div class="card-body">
+                    <pre class="bg-light p-2 rounded small">static readonly HttpClient _c = new();</pre>
+                    <p class="small mb-2">Resolve os sockets, mas a ligação fica aberta para sempre e o <strong>IP resolvido nunca é renovado</strong>.</p>
+
+                    <ul class="list-group list-group-flush small mb-2">
+                        <li class="list-group-item">🕘 <strong>Seg 9h</strong>: resolve para <code>10.0.0.5</code></li>
+                        <li class="list-group-item">🚀 <strong>Ter 3h</strong>: a API muda para <code>10.0.0.9</code></li>
+                        <li class="list-group-item text-danger">🔌 <strong>Ter 3h01</strong>: continua a chamar <code>10.0.0.5</code></li>
+                        <li class="list-group-item text-danger">🔁 Só um restart resolve</li>
+                    </ul>
+
+                    <div class="alert alert-warning small mb-0">DNS desatualizado: falhas depois de deploys ou failovers.</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card h-100 border-success">
+                <div class="card-header bg-success text-white">✅ 3. IHttpClientFactory</div>
+                <div class="card-body">
+                    <pre class="bg-light p-2 rounded small">AddHttpClient&lt;ICotacaoApi, CotacaoApi&gt;(c =&gt;
+  c.BaseAddress = new Uri("..."));</pre>
+                    <p class="small mb-2">Mantém um <strong>pool de handlers</strong> reutilizados e os <strong>recicla a cada 2 min</strong>.</p>
+
+                    <div class="small text-muted">Sockets presos</div>
+                    <div class="progress mb-2" style="height:22px;"><div class="progress-bar bg-success" style="width:8%">poucos</div></div>
+
+                    <ul class="list-group list-group-flush small mb-2">
+                        <li class="list-group-item">♻️ Ligações reutilizadas</li>
+                        <li class="list-group-item">🔄 DNS renovado a cada ciclo</li>
+                        <li class="list-group-item">🧩 Handlers (JWT, log, retry)</li>
+                    </ul>
+
+                    <div class="alert alert-success small mb-0">Resolve os dois problemas ao mesmo tempo.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <h4 class="mt-5">🔄 Ciclo de vida dos handlers no factory</h4>
+    <div class="d-flex flex-wrap align-items-center gap-2 mt-3">
+        <span class="badge bg-primary p-3">CreateClient()</span>
+        <span>➜</span>
+        <span class="badge bg-primary p-3">Handler do pool</span>
+        <span>➜</span>
+        <span class="badge bg-primary p-3">Reutiliza ligação</span>
+        <span>➜</span>
+        <span class="badge bg-secondary p-3">⏱️ 2 min</span>
+        <span>➜</span>
+        <span class="badge bg-success p-3">Novo handler + novo DNS</span>
+    </div>
+
+    <h4 class="mt-5">🖥️ Servidor vs WebAssembly</h4>
+    <table class="table table-bordered mt-3 align-middle">
+        <thead class="table-light">
+            <tr><th>Benefício</th><th class="text-center">Blazor Server</th><th class="text-center">Blazor WASM</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>Evita esgotamento de sockets</td><td class="text-center">✅</td><td class="text-center">➖ o browser gere (fetch)</td></tr>
+            <tr><td>Renova o DNS</td><td class="text-center">✅</td><td class="text-center">➖ o browser gere</td></tr>
+            <tr><td>Configuração centralizada</td><td class="text-center">✅</td><td class="text-center">✅</td></tr>
+            <tr><td>DelegatingHandlers (JWT, log, retry)</td><td class="text-center">✅</td><td class="text-center">✅</td></tr>
+            <tr><td>Testabilidade (interface)</td><td class="text-center">✅</td><td class="text-center">✅</td></tr>
+            <tr><td>Separação de responsabilidades</td><td class="text-center">✅</td><td class="text-center">✅</td></tr>
+        </tbody>
+    </table>
+
+    <div class="alert alert-info mt-4">
+        <strong>🎤 Para a entrevista:</strong> o <code>IHttpClientFactory</code> nasceu para resolver o esgotamento de sockets e o DNS desatualizado,
+        que são problemas de servidor. Em WASM esses dois não se aplicam, mas eu uso Typed Clients na mesma pela configuração centralizada,
+        pelos handlers, pela testabilidade e pela separação de responsabilidades.
+    </div>
+</div>

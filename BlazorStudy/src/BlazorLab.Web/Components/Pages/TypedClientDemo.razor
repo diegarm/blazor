@@ -1,0 +1,52 @@
+@page "/conceitos/typed-client"
+@using BlazorLab.Web.Services
+@inject IUserApi UserApi
+@rendermode InteractiveServer
+
+<div class="container mt-4">
+    <h1>🌐 IHttpClientFactory / Typed Client</h1>
+    <p class="text-muted">
+        O componente chama <code>UserApi.GetUserAsync()</code> e não conhece URLs, headers nem token.
+        O <code>BaseAddress</code> e o <code>AuthLoggingHandler</code> (token + log) são configurados uma única vez no <code>Program.cs</code>.
+        Veja o log no console do servidor.
+    </p>
+
+    <div class="input-group mb-3" style="max-width: 300px;">
+        <input type="number" class="form-control" min="1" max="10" @bind="_id" />
+        <button class="btn btn-primary" @onclick="Carregar">Buscar</button>
+    </div>
+
+    @if (_erro is not null)
+    {
+        <div class="alert alert-danger">@_erro</div>
+    }
+    else if (_user is not null)
+    {
+        <div class="card" style="max-width: 300px;">
+            <div class="card-body">
+                <h5>@_user.Name</h5>
+                <p class="mb-0">@_user.Email</p>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private int _id = 1;
+    private UserDto? _user;
+    private string? _erro;
+
+    private async Task Carregar()
+    {
+        try
+        {
+            _erro = null;
+            _user = await UserApi.GetUserAsync(_id);
+        }
+        catch (HttpRequestException ex)
+        {
+            _user = null;
+            _erro = ex.Message;
+        }
+    }
+}
